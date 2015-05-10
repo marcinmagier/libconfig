@@ -40,21 +40,26 @@ int main(int argc, char **argv)
 
   /* Add some settings to the configuration. */
   group = config_setting_add(root, "address", CONFIG_TYPE_GROUP);
+  config_setting_set_description(group, "Detailed description");
 
   setting = config_setting_add(group, "street", CONFIG_TYPE_STRING);
   config_setting_set_string(setting, "1 Woz Way");
+  config_setting_set_comment(setting, "Street name");
 
   setting = config_setting_add(group, "city", CONFIG_TYPE_STRING);
   config_setting_set_string(setting, "San Jose");
+  config_setting_set_comment(setting, "City name");
 
   setting = config_setting_add(group, "state", CONFIG_TYPE_STRING);
   config_setting_set_string(setting, "CA");
+  config_setting_set_comment(setting, "State name");
 
   setting = config_setting_add(group, "zip", CONFIG_TYPE_INT);
   config_setting_set_int(setting, 95110);
 
   array = config_setting_add(root, "numbers", CONFIG_TYPE_ARRAY);
-
+  config_setting_set_description_space(array, 2);
+  config_setting_set_description(array, "Array of numbers\ndetails");
   for(i = 0; i < 10; ++i)
   {
     setting = config_setting_add(array, NULL, CONFIG_TYPE_INT);

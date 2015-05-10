@@ -396,6 +396,26 @@ static void __config_write_value(const config_t *config,
   }
 }
 
+static void __config_write_description(const config_t *config,
+                                       const config_setting_t *setting,
+                                       FILE *stream, int depth)
+{
+  int i;
+  for(i=0; i<setting->description_space; ++i)
+    fputc('\n', stream);
+
+  if(setting->description)
+    fprintf(stream, "/*\n%s\n*/\n", setting->description);
+}
+
+static void __config_write_comment(const config_t *config,
+                                   const config_setting_t *setting,
+                                   FILE *stream, int depth)
+{
+  if(setting->comment)
+    fprintf(stream, "\t\t// %s", setting->comment);
+}
+
 /* ------------------------------------------------------------------------- */
 
 static void __config_list_add(config_list_t *list, config_setting_t *setting)
@@ -478,6 +498,12 @@ static void __config_setting_destroy(config_setting_t *setting)
       if(setting->value.list)
         __config_list_destroy(setting->value.list);
     }
+
+    if(setting->description)
+        _delete(setting->description);
+
+    if(setting->comment)
+        _delete(setting->comment);
 
     if(setting->hook && setting->config->destructor)
       setting->config->destructor(setting->hook);
@@ -645,6 +671,8 @@ static void __config_write_setting(const config_t *config,
     = ((config->options & CONFIG_OPTION_COLON_ASSIGNMENT_FOR_NON_GROUPS) != 0)
     ? ':' : '=';
 
+  __config_write_description(config, setting, stream, depth);
+
   if(depth > 1)
     __config_indent(stream, depth, config->tab_width);
 
@@ -663,7 +691,10 @@ static void __config_write_setting(const config_t *config,
   if(depth > 0)
   {
     if((config->options & CONFIG_OPTION_SEMICOLON_SEPARATORS) != 0)
+    {
       fputc(';', stream);
+      __config_write_comment(config, setting, stream, depth);
+    }
 
     fputc('\n', stream);
   }
@@ -817,6 +848,9 @@ static config_setting_t *config_setting_create(config_setting_t *parent,
   setting->config = parent->config;
   setting->hook = NULL;
   setting->line = 0;
+  setting->description_space = 0;
+  setting->description = NULL;
+  setting->comment = NULL;
 
   list = parent->value.list;
 
@@ -1182,6 +1216,57 @@ short config_setting_get_format(const config_setting_t *setting)
 {
   return(setting->format != 0 ? setting->format
          : setting->config->default_format);
+}
+
+/* ------------------------------------------------------------------------- */
+
+unsigned short config_setting_get_description_space(const config_setting_t *setting)
+{
+  return setting->description_space;
+}
+
+/* ------------------------------------------------------------------------- */
+
+int config_setting_set_description_space(config_setting_t *setting, unsigned short value)
+{
+  setting->description_space = value;
+  return(CONFIG_TRUE);
+}
+
+/* ------------------------------------------------------------------------- */
+
+const char *config_setting_get_description(const config_setting_t *setting)
+{
+  return setting->description;
+}
+
+/* ------------------------------------------------------------------------- */
+
+int config_setting_set_description(config_setting_t *setting, const char *value)
+{
+  if(setting->description)
+    _delete(setting->description);
+
+  setting->description = (value == NULL) ? NULL : strdup(value);
+  return(CONFIG_TRUE);
+}
+
+/* ------------------------------------------------------------------------- */
+
+const char *config_setting_get_comment(const config_setting_t *setting)
+{
+  return setting->comment;
+}
+
+/* ------------------------------------------------------------------------- */
+
+int config_setting_set_comment(config_setting_t *setting, const char *value)
+{
+    if(setting->comment)
+      _delete(setting->comment);
+
+    setting->comment = (value == NULL) ? NULL : strdup(value);
+    return(CONFIG_TRUE);
 }
 
 /* ------------------------------------------------------------------------- */

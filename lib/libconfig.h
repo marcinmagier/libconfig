@@ -87,6 +87,9 @@ typedef struct config_setting_t
   void *hook;
   unsigned int line;
   const char *file;
+  unsigned short description_space;
+  char *description;
+  char *comment;
 } config_setting_t;
 
 typedef enum
@@ -182,6 +185,19 @@ extern LIBCONFIG_API int config_setting_set_format(config_setting_t *setting,
                                                    short format);
 extern LIBCONFIG_API short config_setting_get_format(
   const config_setting_t *setting);
+
+extern LIBCONFIG_API unsigned short config_setting_get_description_space(
+  const config_setting_t *setting);
+extern LIBCONFIG_API int config_setting_set_description_space(
+  config_setting_t *setting, unsigned short value);
+extern LIBCONFIG_API const char *config_setting_get_description(
+  const config_setting_t *setting);
+extern LIBCONFIG_API int config_setting_set_description(
+  config_setting_t *setting, const char *value);
+extern LIBCONFIG_API const char *config_setting_get_comment(
+  const config_setting_t *setting);
+extern LIBCONFIG_API int config_setting_set_comment(
+  config_setting_t *setting, const char *value);
 
 extern LIBCONFIG_API int config_setting_get_int_elem(
   const config_setting_t *setting, int idx);
